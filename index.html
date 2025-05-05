@@ -11,16 +11,149 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="./css/styles.css">
-
-  <!-- External JS -->
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/esri-leaflet@3.0.0/dist/esri-leaflet.js"></script>
-  <script src="https://unpkg.com/@tweenjs/tween.js@18.6.4/dist/tween.umd.js"></script>
-  <script src="./src/CanvasFlowmapLayer.js"></script>
-  <script src="https://unpkg.com/papaparse@5.3.0/papaparse.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    /* Enhanced legend styles */
+    .legend {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      font-family: 'Arial', sans-serif;
+      max-width: 220px;
+      transition: all 0.3s ease;
+    }
+    
+    .legend:hover {
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .legend-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+    }
+    
+    .legend-scale {
+      margin-bottom: 10px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      transition: transform 0.2s;
+    }
+    
+    .legend-item:hover {
+      transform: translateX(3px);
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 12px;
+      border: 2px solid white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .legend-label {
+      font-size: 13px;
+      color: #555;
+    }
+    
+    .legend-note {
+      font-size: 11px;
+      color: #888;
+      margin-top: 10px;
+      font-style: italic;
+    }
+    
+    .legend-toggle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+    }
+    
+    .legend-toggle-text {
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .legend-toggle-icon {
+      font-size: 14px;
+      transition: transform 0.3s;
+    }
+    
+    .legend.collapsed {
+      padding: 10px 15px;
+    }
+    
+    .legend.collapsed .legend-scale,
+    .legend.collapsed .legend-note {
+      display: none;
+    }
+    
+    .legend.collapsed .legend-toggle-icon {
+      transform: rotate(180deg);
+    }
+    
+    /* Drilldown button styles */
+    .drilldown-back {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      z-index: 1000;
+      background: #418FDE;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      display: none;
+    }
+    
+    .drilldown-back:hover {
+      background: #3a7bc8;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .drilldown-back:active {
+      transform: translateY(0);
+    }
+    
+    /* Map title styles */
+    #map-title-3 {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 20px;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 18px;
+      color: #333;
+      text-align: center;
+      max-width: 80%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
 </head>
 
 <body>
@@ -32,7 +165,6 @@
   </div>
 
   <script>
-    // Wait for DOM to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
       // Configuration constants
       const MAP_CONFIG = {
@@ -43,24 +175,14 @@
         padding: [50, 50]
       };
 
-      const MARKER_STYLES = {
+      const COLORS = {
         state: {
-          fillColor: '#418FDE',
-          color: '#fff',
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.7,
-          baseRadius: 8,
-          maxRadius: 28
+          fill: '#418FDE',
+          stroke: '#fff'
         },
         district: {
-          fillColor: '#41DE8F',
-          color: '#fff',
-          weight: 1,
-          opacity: 1,
-          fillOpacity: 0.7,
-          baseRadius: 8,
-          maxRadius: 28
+          fill: '#41DE8F',
+          stroke: '#fff'
         }
       };
 
@@ -113,6 +235,7 @@
       const stateMarkersLayer = L.layerGroup();
       const districtMarkersLayer = L.layerGroup();
       let currentState = null;
+      let currentDataRange = null;
       const drilldownBackBtn = document.getElementById('drilldown-back');
 
       // Initialize the map with state data
@@ -137,7 +260,9 @@
             }
 
             const geoJsonData = convertToGeoJSON(results.data);
+            currentDataRange = calculateDataRange(results.data, 'total_idps');
             createStateMarkers(geoJsonData);
+            updateLegend('state', currentDataRange);
           },
           error: (error) => {
             console.error('Error loading state data:', error);
@@ -158,9 +283,24 @@
         };
       }
 
+      // Calculate data range for legend
+      function calculateDataRange(data, field) {
+        const values = data.map(item => item[field]);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const mid = min + (max - min) / 2;
+        
+        return {
+          min: min,
+          mid: mid,
+          max: max,
+          field: field
+        };
+      }
+
       // Create state markers from GeoJSON data
       function createStateMarkers(geoJsonData) {
-        const maxTotalIdps = Math.max(...geoJsonData.features.map(f => f.properties.total_idps));
+        const maxTotalIdps = currentDataRange.max;
 
         L.geoJSON(geoJsonData, {
           pointToLayer: (feature, latlng) => {
@@ -168,7 +308,8 @@
               latlng, 
               feature.properties.total_idps, 
               maxTotalIdps, 
-              MARKER_STYLES.state
+              COLORS.state.fill,
+              COLORS.state.stroke
             );
 
             // Add click handler for drill-down
@@ -185,17 +326,16 @@
       }
 
       // Create a circle marker with animation
-      function createCircleMarker(latlng, value, maxValue, style) {
-        const normalizedValue = value / maxValue;
-        const baseRadius = style.baseRadius + (normalizedValue * (style.maxRadius - style.baseRadius));
+      function createCircleMarker(latlng, value, maxValue, fillColor, strokeColor) {
+        const baseRadius = 8 + (value / maxValue) * 20;
         
         const marker = L.circleMarker(latlng, {
           radius: baseRadius,
-          fillColor: style.fillColor,
-          color: style.color,
-          weight: style.weight,
-          opacity: style.opacity,
-          fillOpacity: style.fillOpacity
+          fillColor: fillColor,
+          color: strokeColor,
+          weight: 1,
+          opacity: 1,
+          fillOpacity: 0.7
         });
 
         animateCircleMarker(marker, baseRadius);
@@ -217,24 +357,43 @@
       function addPopupAndTooltip(layer, properties, level) {
         if (level === 'state') {
           layer.bindPopup(`
-            <b>State:</b> ${properties.state}<br/>
-            <b>Total IDPs:</b> ${properties.total_idps.toLocaleString()}<br/>
-            <small>Click to view districts</small>
+            <div style="font-family: Arial, sans-serif; min-width: 200px;">
+              <h3 style="margin: 0 0 10px 0; color: #418FDE;">${properties.state}</h3>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <span style="font-weight: bold;">Total IDPs:</span>
+                <span>${properties.total_idps.toLocaleString()}</span>
+              </div>
+              <div style="text-align: center; margin-top: 10px; font-size: 12px; color: #888;">
+                <i class="fas fa-mouse-pointer"></i> Click to view districts
+              </div>
+            </div>
           `);
 
           layer.bindTooltip(`
-            <b>${properties.state}</b><br/>
-            <b>Total IDPs:</b> ${properties.total_idps.toLocaleString()}
+            <div style="font-family: Arial, sans-serif;">
+              <b>${properties.state}</b><br/>
+              IDPs: ${properties.total_idps.toLocaleString()}
+            </div>
           `);
         } else {
           layer.bindPopup(`
-            <b>District:</b> ${properties.district}<br/>
-            <b>Total IDPs:</b> ${properties.total_idps.toLocaleString()}
+            <div style="font-family: Arial, sans-serif; min-width: 200px;">
+              <h3 style="margin: 0 0 10px 0; color: #41DE8F;">${properties.district}</h3>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="font-weight: bold;">Total IDPs:</span>
+                <span>${properties.total_idps.toLocaleString()}</span>
+              </div>
+              <div style="margin-top: 5px; font-size: 12px; color: #888;">
+                <i class="fas fa-map-marker-alt"></i> ${properties.state}
+              </div>
+            </div>
           `);
 
           layer.bindTooltip(`
-            <b>${properties.district}</b><br/>
-            <b>Total IDPs:</b> ${properties.total_idps.toLocaleString()}
+            <div style="font-family: Arial, sans-serif;">
+              <b>${properties.district}</b><br/>
+              IDPs: ${properties.total_idps.toLocaleString()}
+            </div>
           `);
         }
       }
@@ -261,7 +420,9 @@
             }
 
             const stateDistricts = results.data.filter(d => d.state === stateName);
+            currentDataRange = calculateDataRange(stateDistricts, 'total_idps');
             createDistrictMarkers(stateDistricts, stateName);
+            updateLegend('district', currentDataRange);
           },
           error: (error) => {
             console.error('Error loading district data:', error);
@@ -274,14 +435,15 @@
       // Create district markers
       function createDistrictMarkers(districts, stateName) {
         districtMarkersLayer.clearLayers();
-        const maxTotalIdps = Math.max(...districts.map(d => d.total_idps));
+        const maxTotalIdps = currentDataRange.max;
 
         districts.forEach(district => {
           const marker = createCircleMarker(
             [district.lat, district.lon], 
             district.total_idps, 
             maxTotalIdps, 
-            MARKER_STYLES.district
+            COLORS.district.fill,
+            COLORS.district.stroke
           );
 
           addPopupAndTooltip(marker, district, 'district');
@@ -312,6 +474,7 @@
         document.getElementById('map-title-3').textContent = 'Total Number of IDPs by State';
         drilldownBackBtn.style.display = 'none';
         currentState = null;
+        updateLegend('state', currentDataRange);
       }
 
       // Show error message
@@ -328,27 +491,80 @@
         legend.onAdd = () => {
           const div = L.DomUtil.create('div', 'legend');
           div.innerHTML = `
-            <span style="font-size:14px; font-weight:bold;">Total IDPs by State:</span><br/>
-            <div style="display: flex; align-items: center; margin-top: 10px;">
-              <div style="width: 10px; height: 10px; background: #418FDE; border-radius: 50%; margin-right: 10px;"></div>
-              <span style="font-size:12px;">  < 500,000 IDPs</span>
+            <div class="legend-title">IDPs by State</div>
+            <div class="legend-scale">
+              <div class="legend-item">
+                <div class="legend-color" style="background: ${COLORS.state.fill}; width: 10px; height: 10px;"></div>
+                <div class="legend-label">Loading data...</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: ${COLORS.state.fill}; width: 20px; height: 20px;"></div>
+                <div class="legend-label">Loading data...</div>
+              </div>
+              <div class="legend-item">
+                <div class="legend-color" style="background: ${COLORS.state.fill}; width: 30px; height: 30px;"></div>
+                <div class="legend-label">Loading data...</div>
+              </div>
             </div>
-            <div style="display: flex; align-items: center; margin-top: 5px;">
-              <div style="width: 20px; height: 20px; background: #418FDE; border-radius: 50%; margin-right: 10px;"></div>
-              <span style="font-size:12px;"> 500,001 - 1,000,000 IDPs</span>
-            </div>
-            <div style="display: flex; align-items: center; margin-top: 5px;">
-              <div style="width: 30px; height: 30px; background: #418FDE; border-radius: 50%; margin-right: 10px;"></div>
-              <span style="font-size:12px;"> > 1,000,001 IDPs</span>
-            </div>
-            <div style="margin-top: 10px; font-size:12px; color: #666;">
-              Click on a state to view district-level data
+            <div class="legend-note">Click on a state to view district-level data</div>
+            <div class="legend-toggle">
+              <span class="legend-toggle-text">Show details</span>
+              <i class="fas fa-chevron-up legend-toggle-icon"></i>
             </div>
           `;
+          
+          // Add toggle functionality
+          const toggle = div.querySelector('.legend-toggle');
+          toggle.addEventListener('click', function() {
+            div.classList.toggle('collapsed');
+          });
+          
           return div;
         };
         
         legend.addTo(map3);
+        return legend;
+      }
+
+      // Update legend based on current view and data range
+      function updateLegend(level, dataRange) {
+        const legend = document.querySelector('.legend');
+        if (!legend) return;
+        
+        const title = legend.querySelector('.legend-title');
+        const note = legend.querySelector('.legend-note');
+        const colorItems = legend.querySelectorAll('.legend-item');
+        const colors = level === 'state' ? COLORS.state : COLORS.district;
+        
+        if (level === 'state') {
+          title.textContent = 'IDPs by State';
+          note.textContent = 'Click on a state to view district-level data';
+        } else {
+          title.textContent = 'IDPs by District';
+          note.textContent = `Showing districts in ${currentState}`;
+        }
+        
+        if (dataRange) {
+          const minLabel = formatNumber(dataRange.min);
+          const midLabel = formatNumber(dataRange.mid);
+          const maxLabel = formatNumber(dataRange.max);
+          
+          colorItems[0].querySelector('.legend-label').textContent = `≤ ${midLabel}`;
+          colorItems[1].querySelector('.legend-label').textContent = `${midLabel} - ${formatNumber(dataRange.max * 0.75)}`;
+          colorItems[2].querySelector('.legend-label').textContent = `≥ ${formatNumber(dataRange.max * 0.75)}`;
+          
+          // Update colors
+          colorItems.forEach(item => {
+            const colorCircle = item.querySelector('.legend-color');
+            colorCircle.style.background = colors.fill;
+            colorCircle.style.borderColor = colors.stroke;
+          });
+        }
+      }
+
+      // Format numbers with commas
+      function formatNumber(num) {
+        return num.toLocaleString();
       }
 
       // Setup event listeners
