@@ -36,12 +36,12 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Configuration constants
       const MAP_CONFIG = {
-        center: [16, 30],
-        zoom: L.Browser.mobile ? 3 : 6.45,
-        minZoom: 3,
-        maxZoom: 18,
-        padding: [50, 50]
-      };
+  center: [16, 30],
+  zoom: L.Browser.mobile ? 2 : 4,  // Lower numbers = more zoomed out
+  minZoom: 1,  // Allows zooming out further
+  maxZoom: 18,
+  padding: [50, 50]
+};
 
       const MARKER_STYLES = {
         state: {
