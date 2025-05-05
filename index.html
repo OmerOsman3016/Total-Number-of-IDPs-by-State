@@ -25,7 +25,7 @@
 </head>
 
 <body>
-  
+ 
 
       <!-- Map Container for Total Number of IDPs by State -->
       <div class="map-container">
@@ -35,9 +35,423 @@
       </div>
     </div>
     
-   
-  <script>
     
+  <script>
+    // Loading spinner functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // Simulate loading progress
+      let progress = 0;
+      const progressBar = document.getElementById('progress-bar');
+      const loadingSpinner = document.getElementById('loading-spinner');
+      const loadingText = document.querySelector('.loading-text');
+      
+      // Update progress bar
+      const progressInterval = setInterval(function() {
+        progress += Math.random() * 10;
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(progressInterval);
+          
+          // Change text when loading is complete
+          loadingText.textContent = 'Almost there...';
+          
+          // Add a small delay before hiding to ensure everything is loaded
+          setTimeout(function() {
+            loadingSpinner.style.opacity = '0';
+            setTimeout(function() {
+              loadingSpinner.style.display = 'none';
+              document.body.style.animation = 'fadeIn 1.5s ease-in-out forwards';
+            }, 500);
+          }, 500);
+        }
+        progressBar.style.width = progress + '%';
+      }, 200);
+    });
+
+    // Slideshow functionality
+    let slideIndex = 1;
+    showSlides(slideIndex);
+    
+    // Next/previous controls
+    function plusSlides(n) {
+      showSlides(slideIndex += n);
+    }
+    
+    // Thumbnail image controls
+    function currentSlide(n) {
+      showSlides(slideIndex = n);
+    }
+    
+    function showSlides(n) {
+      let i;
+      let slides = document.getElementsByClassName("slide");
+      let dots = document.getElementsByClassName("dot");
+      
+      if (n > slides.length) {slideIndex = 1}
+      if (n < 1) {slideIndex = slides.length}
+      
+      for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+      }
+      
+      for (i = 0; i < dots.length; i++) {
+        dots[i].className = dots[i].className.replace(" active", "");
+      }
+      
+      slides[slideIndex-1].style.display = "block";
+      dots[slideIndex-1].className += " active";
+    }
+    
+    // Auto-advance slides every 5 seconds
+    setInterval(() => {
+      plusSlides(1);
+    }, 5000);
+
+    // Define Mapbox custom layers
+    const mapboxCustom1 = L.tileLayer('https://api.mapbox.com/styles/v1/omerosman/cm8oy6is4006101si7ll3bs4h/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    const mapboxCustom2 = L.tileLayer('https://api.mapbox.com/styles/v1/omerosman/cm8oy6is4006101si7ll3bs4h/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    const mapboxCustom3 = L.tileLayer('https://api.mapbox.com/styles/v1/omerosman/cm8oy6is4006101si7ll3bs4h/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    const mapboxCustom4 = L.tileLayer('https://api.mapbox.com/styles/v1/omerosman/cm8oy6is4006101si7ll3bs4h/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    // Initialize the first map
+    const map = L.map('map').setView([16, 30], L.Browser.mobile ? 3 : 5.5);
+
+    // Define multiple base layers for the first map
+    const cartoDBLight1 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+
+    const openStreetMap1 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+
+    const esriWorldImagery1 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    });
+
+    const stamenToner1 = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+      attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>'
+    });
+
+    const mapboxLight = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    const mapboxStreets = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    const mapboxSatellite = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    const mapboxOutdoors = L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+        attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        tileSize: 512,
+        zoomOffset: -1,
+        maxZoom: 18
+    });
+
+    // Add default base layer to the first map
+    mapboxCustom1.addTo(map);
+
+    // Add layer control to the first map
+    const baseLayers1 = {
+      "Mapbox Custom": mapboxCustom1,
+      "CartoDB Light": cartoDBLight1,
+      "OpenStreetMap": openStreetMap1,
+      "Esri World Imagery": esriWorldImagery1,
+      "Stamen Toner": stamenToner1,
+      "Mapbox Light": mapboxLight,
+      "Mapbox Streets": mapboxStreets,
+      "Mapbox Outdoors": mapboxOutdoors,
+      "Mapbox Satellite": mapboxSatellite
+    };
+
+    L.control.layers(baseLayers1).addTo(map);
+
+    // Parse CSV data and create flow map layer for the first map
+    Papa.parse('./data/data.csv', {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const geoJsonFeatureCollection = {
+          type: 'FeatureCollection',
+          features: results.data.map(datum => ({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [datum.s_lon, datum.s_lat] },
+            properties: datum
+          }))
+        };
+
+        flowmapLayer = L.canvasFlowmapLayer(geoJsonFeatureCollection, {
+          originAndDestinationFieldIds: {
+            originUniqueIdField: 's_state_id',
+            originGeometry: { x: 's_lon', y: 's_lat' },
+            destinationUniqueIdField: 'e_locality_id',
+            destinationGeometry: { x: 'e_lon', y: 'e_lat' }
+          },
+          style: (feature) => {
+            const baseRadius = 6;
+            const maxRadius = 20;
+            const volume = feature.properties.e_Volume || 0;
+
+            const radius = feature.properties.isOrigin
+              ? baseRadius
+              : Math.min(baseRadius + (volume / 5000), maxRadius);
+
+            return {
+              radius: radius,
+              weight: 1,
+              color: feature.properties.isOrigin ? '#FFFFFF' : '#FFFFFF',
+              fillColor: feature.properties.isOrigin ? '#418FDE' : 'rgb(255, 103, 31)',
+              fillOpacity: feature.properties.isOrigin ? 0.8 : 0.7
+            };
+          },
+          canvasBezierStyle: {
+            type: 'classBreaks',
+            field: 'e_Volume',
+            classBreakInfos: [
+              { classMinValue: 1, classMaxValue: 10000, symbol: { strokeStyle: '#ffb81c', lineWidth: 0.5, lineCap: 'round', shadowColor: '#fee8c8', shadowBlur: 2.0 } },
+              { classMinValue: 10001, classMaxValue: 20000, symbol: { strokeStyle: '#ff671f', lineWidth: 1.5, lineCap: 'round', shadowColor: '#fdbb84', shadowBlur: 2.0 } },
+              { classMinValue: 20001, classMaxValue: 200000, symbol: { strokeStyle: '#d22630', lineWidth: 3, lineCap: 'round', shadowColor: '#e34a33', shadowBlur: 2.0 } }
+            ],
+            defaultSymbol: { strokeStyle: '#e7e1ef', lineWidth: 0.5, lineCap: 'round', shadowColor: '#e7e1ef', shadowBlur: 1.5 }
+          },
+          pathDisplayMode: 'all',
+          animationStarted: true,
+          animationEasingFamily: 'Linear',
+          animationEasingType: 'None',
+          animationDuration: 3000,
+          onEachFeature: addTooltip
+        }).addTo(map);
+
+        // Add tooltip and popup to features
+        function addTooltip(feature, layer) {
+          const tooltipContent = feature.properties.isOrigin
+            ? `State of Displacement: ${feature.properties.s_State}`
+            : `State of Return: ${feature.properties.e_locality}`;
+
+          layer.bindTooltip(tooltipContent);
+          layer.on('mouseover', () => layer.openTooltip());
+          layer.on('mouseout', () => layer.closeTooltip());
+
+          // Add popup
+          const popupContent = feature.properties.isOrigin
+            ? `<b>State of Displacement:</b> ${feature.properties.s_State}`
+            : `<b>State of Return:</b> ${feature.properties.e_locality}`;
+
+          layer.bindPopup(popupContent);
+        }
+
+        // Highlight paths on mouseover
+        flowmapLayer.on('mouseover', (e) => {
+          if (e.sharedOriginFeatures.length) {
+            flowmapLayer.selectFeaturesForPathDisplay(e.sharedOriginFeatures, 'SELECTION_NEW');
+          }
+          if (e.sharedDestinationFeatures.length) {
+            flowmapLayer.selectFeaturesForPathDisplay(e.sharedDestinationFeatures, 'SELECTION_NEW');
+          }
+        });
+
+        // Select initial feature for path display
+        flowmapLayer.selectFeaturesForPathDisplayById('s_state_id', "SD15", true, 'SELECTION_NEW');
+      }
+    });
+
+    // Add legend to the first map
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = () => {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML = `
+        <span style="font-size:14px">Returnee Flow Volume:</span><br/>
+        <div style="width:70px;height:3px;background:#ffb81c;float:left;margin-right:10px;margin-top:10px"></div>
+        <span style="float:left;font-weight:bold"> < 10000</span><br/>
+        <div style="width:70px;height:4px;background:#ff671f;float:left;margin-right:10px;margin-top:10px"></div>
+        <span style="float:left;font-weight:bold">10,001 - 20,000</span><br/>
+        <div style="width:70px;height:7px;background:#e34a33;float:left;margin-right:10px;margin-top:10px"></div>
+        <span style="float:left;font-weight:bold"> > 20,000</span><br/>
+      `;
+      return div;
+    };
+    legend.addTo(map);
+
+    // Initialize the second map
+    const map2 = L.map('map2').setView([16, 30], L.Browser.mobile ? 3 : 5.5);
+
+    // Define multiple base layers for the second map
+    const cartoDBLight2 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+
+    const openStreetMap2 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+
+    const esriWorldImagery2 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    });
+
+    const stamenToner2 = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+      attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>'
+    });
+
+    // Add default base layer to the second map
+    mapboxCustom2.addTo(map2);
+
+    // Add layer control to the second map
+    const baseLayers2 = {
+      "Mapbox Custom": mapboxCustom2,
+      "CartoDB Light": cartoDBLight2,
+      "OpenStreetMap": openStreetMap2,
+      "Esri World Imagery": esriWorldImagery2,
+      "Stamen Toner": stamenToner2
+    };
+
+    L.control.layers(baseLayers2).addTo(map2);
+
+    // Parse CSV data and create flow map layer for the second map
+    Papa.parse('./data/data_idps.csv', {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const geoJsonFeatureCollection2 = {
+          type: 'FeatureCollection',
+          features: results.data.map(datum => ({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [datum.s_lon, datum.s_lat] },
+            properties: datum
+          }))
+        };
+
+        const flowmapLayer2 = L.canvasFlowmapLayer(geoJsonFeatureCollection2, {
+          originAndDestinationFieldIds: {
+            originUniqueIdField: 's_state_id',
+            originGeometry: { x: 's_lon', y: 's_lat' },
+            destinationUniqueIdField: 'e_locality_id',
+            destinationGeometry: { x: 'e_lon', y: 'e_lat' }
+          },
+          style: (feature) => {
+            const baseRadius = 12;
+            const maxRadius = 6;
+            const volume = feature.properties.e_Volume || 0;
+
+            const radius = feature.properties.isOrigin
+              ? baseRadius
+              : Math.min(baseRadius + (volume / 5000), maxRadius);
+
+            return {
+              radius: radius,
+              weight: 1,
+              color: feature.properties.isOrigin ? '#FFFFFF' : '#FFFFFF',
+              fillColor: feature.properties.isOrigin ? 'rgb(255, 103, 31)' : '#418FDE',
+              fillOpacity: feature.properties.isOrigin ? 0.8 : 0.7
+            };
+          },
+          canvasBezierStyle: {
+            type: 'classBreaks',
+            field: 'e_Volume',
+            classBreakInfos: [
+              { classMinValue: 1, classMaxValue: 10000, symbol: { strokeStyle: '#ffb81c', lineWidth: 0.5, lineCap: 'round', shadowColor: '#fee8c8', shadowBlur: 2.0 } },
+              { classMinValue: 10001, classMaxValue: 20000, symbol: { strokeStyle: '#ff671f', lineWidth: 1.5, lineCap: 'round', shadowColor: '#fdbb84', shadowBlur: 2.0 } },
+              { classMinValue: 20001, classMaxValue: 200000, symbol: { strokeStyle: '#d22630', lineWidth: 3, lineCap: 'round', shadowColor: '#e34a33', shadowBlur: 2.0 } }
+            ],
+            defaultSymbol: { strokeStyle: '#e7e1ef', lineWidth: 0.5, lineCap: 'round', shadowColor: '#e7e1ef', shadowBlur: 1.5 }
+          },
+          pathDisplayMode: 'all',
+          animationStarted: true,
+          animationEasingFamily: 'Linear',
+          animationEasingType: 'None',
+          animationDuration: 3000,
+          onEachFeature: addTooltip
+        }).addTo(map2);
+
+        // Add tooltip and popup to features
+        function addTooltip(feature, layer) {
+          const tooltipContent = feature.properties.isOrigin
+            ? `State of Displacement: ${feature.properties.s_State}`
+            : `State of Return: ${feature.properties.e_locality}`;
+
+          layer.bindTooltip(tooltipContent);
+          layer.on('mouseover', () => layer.openTooltip());
+          layer.on('mouseout', () => layer.closeTooltip());
+
+          // Add popup
+          const popupContent = feature.properties.isOrigin
+            ? `<b>Displacement From:</b> ${feature.properties.s_State}`
+            : `<b>Displacement To:</b> ${feature.properties.e_locality}`;
+
+          layer.bindPopup(popupContent);
+        }
+
+        // Highlight paths on mouseover
+        flowmapLayer2.on('mouseover', (e) => {
+          if (e.sharedOriginFeatures.length) {
+            flowmapLayer2.selectFeaturesForPathDisplay(e.sharedOriginFeatures, 'SELECTION_NEW');
+          }
+          if (e.sharedDestinationFeatures.length) {
+            flowmapLayer2.selectFeaturesForPathDisplay(e.sharedDestinationFeatures, 'SELECTION_NEW');
+          }
+        });
+
+        // Select initial feature for path display
+        flowmapLayer2.selectFeaturesForPathDisplayById('s_state_id', "SD15", true, 'SELECTION_NEW');
+      }
+    });
+
+    // Add legend to the second map
+    const legend2 = L.control({ position: 'bottomright' });
+    legend2.onAdd = () => {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML = `
+        <span style="font-size:14px">Returnee Flow Volume:</span><br/>
+        <div style="width:70px;height:3px;background:#ffb81c;float:left;margin-right:10px;margin-top:10px"></div>
+        <span style="float:left;font-weight:bold"> < 10000</span><br/>
+        <div style="width:70px;height:4px;background:#ff671f;float:left;margin-right:10px;margin-top:10px"></div>
+        <span style="float:left;font-weight:bold">10,001 - 20,000</span><br/>
+        <div style="width:70px;height:7px;background:#e34a33;float:left;margin-right:10px;margin-top:10px"></div>
+        <span style="float:left;font-weight:bold"> > 20,000</span><br/>
+      `;
+      return div;
+    };
+    legend2.addTo(map2);
+
     // Initialize the third map
     const map3 = L.map('map3').setView([16, 30], L.Browser.mobile ? 3 : 5.5);
 
@@ -294,8 +708,1466 @@
     };
     legend3.addTo(map3);
     
+    // Initialize the fourth map
+    const map4 = L.map('map4').setView([16, 30], 5.5);
+
+    // Define multiple base layers for the fourth map
+    const cartoDBLight4 = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap'
+    });
+
+    const openStreetMap4 = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    });
+
+    const esriWorldImagery4 = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    });
+
+    const stamenToner4 = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+      attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>'
+    });
+
+    // Add default base layer to the fourth map
+    mapboxCustom4.addTo(map4);
+
+    // Add layer control to the fourth map
+    const baseLayers4 = {
+      "Mapbox Custom": mapboxCustom4,
+      "CartoDB Light": cartoDBLight4,
+      "OpenStreetMap": openStreetMap4,
+      "Esri World Imagery": esriWorldImagery4,
+      "Stamen Toner": stamenToner4
+    };
+
+    L.control.layers(baseLayers4).addTo(map4);
+
+    // Parse CSV data and create animated markers for the fourth map
+    Papa.parse('./data/total_return.csv', {
+      download: true,
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const geoJsonFeatureCollection4 = {
+          type: 'FeatureCollection',
+          features: results.data.map(datum => ({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [datum.lon, datum.lat] },
+            properties: datum
+          }))
+        };
+
+        // Find the maximum total_return value for normalization
+        const maxTotalReturn = Math.max(...results.data.map(d => d.total_return));
+
+        // Function to animate circle markers
+        function animateCircleMarker(marker, baseRadius) {
+          const tween = new TWEEN.Tween({ radius: baseRadius })
+            .to({ radius: baseRadius * 1.5 }, 1000) // Animate to 1.5x the base radius
+            .easing(TWEEN.Easing.Sinusoidal.InOut) // Smooth easing
+            .yoyo(true) // Reverse the animation
+            .repeat(Infinity) // Repeat indefinitely
+            .onUpdate(({ radius }) => {
+              marker.setRadius(radius); // Update the marker's radius
+            })
+            .start(); // Start the animation
+        }
+
+        // Add animated markers to the fourth map
+        L.geoJSON(geoJsonFeatureCollection4, {
+          pointToLayer: (feature, latlng) => {
+            // Normalize the total_return value to determine the base radius
+            const baseRadius = 8 + (feature.properties.total_return / maxTotalReturn) * 20;
+
+            // Create a circle marker
+            const marker = L.circleMarker(latlng, {
+              radius: baseRadius, // Initial radius
+              fillColor: 'rgba(255, 103, 31, 0.8)', // Orange color for returnees
+              color: '#fff',
+              weight: 1,
+              opacity: 1,
+              fillOpacity: 0.7
+            });
+
+            // Animate the marker
+            animateCircleMarker(marker, baseRadius);
+
+            return marker;
+          },
+          onEachFeature: (feature, layer) => {
+            const popupContent = `
+              <b>State:</b> ${feature.properties.state}<br/>
+              <b>Total Returnees:</b> ${feature.properties.total_return.toLocaleString()}
+            `;
+            layer.bindPopup(popupContent);
+
+            // Add tooltip
+            const tooltipContent = `<b>${feature.properties.state}</b><br/>
+              <b>Total Returnees:</b> ${feature.properties.total_return.toLocaleString()}`;
+            layer.bindTooltip(tooltipContent);
+          }
+        }).addTo(map4);
+      }
+    });
+
+    // Add legend to the fourth map
+    const legend4 = L.control({ position: 'bottomleft' });
+    legend4.onAdd = () => {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML = `
+        <span style="font-size:14px; font-weight:bold;">Total Returnees by State:</span><br/>
+        <div style="display: flex; align-items: center; margin-top: 10px;">
+          <div style="width: 10px; height: 10px; background: rgba(255, 103, 31, 0.8); border-radius: 50%; margin-right: 10px;"></div>
+          <span style="font-size:12px;">< 10,000 Returnees</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px;">
+          <div style="width: 20px; height: 20px; background: rgba(255, 103, 31, 0.8); border-radius: 50%; margin-right: 10px;"></div>
+          <span style="font-size:12px;">10,000 - 50,000 Returnees</span>
+        </div>
+        <div style="display: flex; align-items: center; margin-top: 5px;">
+          <div style="width: 30px; height: 30px; background: rgba(255, 103, 31, 0.8); border-radius: 50%; margin-right: 10px;"></div>
+          <span style="font-size:12px;"> > 50,000 Returnees</span>
+        </div>
+      `;
+      return div;
+    };
+    legend4.addTo(map4);
+
+    // Initialize the country circle map with layer controls
+    const countryCircleMap = L.map('country-circle-map').setView([16, 30], 5);
     
+    // Define multiple base layers for the country circle map
+    const cartoDBLightCountry = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap'
+    });
+
+    const openStreetMapCountry = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    });
+
+    const esriWorldImageryCountry = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    });
+
+    const stamenTonerCountry = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png', {
+      attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>'
+    });
+
+    const mapboxCustomCountry = L.tileLayer('https://api.mapbox.com/styles/v1/omerosman/cm8oy6is4006101si7ll3bs4h/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+      attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      tileSize: 512,
+      zoomOffset: -1,
+      maxZoom: 18
+    });
+
+    // Add default base layer to the country circle map
+    mapboxCustomCountry.addTo(countryCircleMap);
+
+    // Add layer control to the country circle map
+    const baseLayersCountry = {
+      "CartoDB Light": cartoDBLightCountry,
+      "OpenStreetMap": openStreetMapCountry,
+      "Esri World Imagery": esriWorldImageryCountry,
+      "Stamen Toner": stamenTonerCountry,
+      "Mapbox Custom": mapboxCustomCountry
+    };
+
+    // Country data with coordinates and volume
+    const countryData = [
+      {country: "Egypt", e_lat: 26.8206, e_lon: 30.8025, Volume: 1500000},
+      {country: "libya", e_lat: 26.3351, e_lon: 17.2283, Volume: 105721},
+      {country: "Chad", e_lat: 15.4542, e_lon: 18.7322, Volume: 767365},
+      {country: "Central African Republic", e_lat: 6.6111, e_lon: 20.9394, Volume: 35376},
+      {country: "South Sudan", e_lat: 6.877, e_lon: 31.307, Volume: 341909},
+      {country: "Ethiopia", e_lat: 9.145, e_lon: 40.4897, Volume: 88001},
+      {country: "Eritrea", e_lat: 15.1794, e_lon: 39.7823, Volume: 14141}
+    ];
+
+    // Find the maximum volume for scaling
+    const maxVolume = Math.max(...countryData.map(d => d.Volume));
+
+    // Create a layer group for the country circles
+    const countryCirclesLayer = L.layerGroup().addTo(countryCircleMap);
+
+    // Function to animate circle markers
+    function animateCircleMarker(marker, baseRadius) {
+      const tween = new TWEEN.Tween({ radius: baseRadius })
+        .to({ radius: baseRadius * 1.5 }, 1500) // Animate to 1.5x the base radius
+        .easing(TWEEN.Easing.Sinusoidal.InOut) // Smooth easing
+        .yoyo(true) // Reverse the animation
+        .repeat(Infinity) // Repeat indefinitely
+        .onUpdate(({ radius }) => {
+          marker.setRadius(radius); // Update the marker's radius
+        })
+        .start(); // Start the animation
+    }
+
+    // Add animated circle markers for each country to the layer group
+    countryData.forEach(country => {
+      // Calculate base radius based on volume (scaled to a reasonable size)
+      const baseRadius = 5 + (country.Volume / maxVolume) * 30;
+      
+      // Create circle marker
+      const circle = L.circleMarker([country.e_lat, country.e_lon], {
+        radius: baseRadius,
+        fillColor: '#5CB8B2',
+        color: '#fff',
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.7
+      }).addTo(countryCirclesLayer);
+
+      // Add animation
+      animateCircleMarker(circle, baseRadius);
+
+      // Add popup with country info
+      circle.bindPopup(`
+        <b>${country.country}</b><br>
+        Volume: ${country.Volume.toLocaleString()}
+      `);
+
+      // Add tooltip
+      circle.bindTooltip(`
+        <b>${country.country}</b><br>
+        Volume: ${country.Volume.toLocaleString()}
+      `);
+    });
+
+    // Add overlay control for the country circles
+    const overlaysCountry = {
+      "Displacement Circles": countryCirclesLayer
+    };
+
+    // Add layer control with both base layers and overlays
+    L.control.layers(baseLayersCountry, overlaysCountry).addTo(countryCircleMap);
+
+    // Add legend for the country circle map
+    const countryLegend = L.control({ position: 'bottomright' });
+    countryLegend.onAdd = () => {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML = `
+        <h4>Displacement to Neighboring Countries</h4>
+        <div style="display: flex; align-items: center; margin: 5px 0;">
+          <svg width="20" height="20">
+            <circle cx="10" cy="10" r="10" fill="#5CB8B2"/>
+          </svg>
+          Displaced Population
+        </div>
+        <p>Circle size represents relative volume</p>
+      `;
+      return div;
+    };
+    countryLegend.addTo(countryCircleMap);
+
+    // Pie Chart Map Showing Displacement Proportions
+    const map5 = L.map('map5').setView([16, 30], L.Browser.mobile ? 3 : 5.5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map5);
+
+    // State data with coordinates (lat, lng), displaced, total population
+    const stateData = [
+      ["Aj Jazirah", 14.900, 33.434, 876156, 5687557],
+      ["Blue Nile", 11.270, 34.390, 270810, 1344267],
+      ["Central Darfur", 12.900, 23.470, 749491, 1786503],
+      ["East Darfur", 11.160, 26.140, 247874, 1213951],
+      ["Gedaref", 14.040, 35.380, 14327, 2545604],
+      ["Kassala", 15.450, 36.400, 6211, 2811446],
+      ["Khartoum", 15.501, 32.560, 3500400, 9146191],
+      ["North Darfur", 15.766, 27.333, 1844175, 2775652],
+      ["North Kordofan", 13.630, 27.930, 91161, 2160476],
+      ["Northern", 19.615, 30.416, 12052, 1023194],
+      ["Red Sea", 19.580, 37.130, 30480, 1549857],
+      ["River Nile", 18.500, 33.800, 53683, 1651873],
+      ["Sennar", 13.550, 33.600, 244250, 2170863],
+      ["South Darfur", 11.783, 24.883, 2082537, 3912372],
+      ["South Kordofan", 11.150, 29.633, 414734, 2017962],
+      ["West Darfur", 12.900, 22.466, 368971, 1940860],
+      ["West Kordofan", 11.200, 28.433, 314484, 1713462],
+      ["White Nile", 13.450, 32.500, 179544, 3046811]
+    ];
+
+    // Create pie chart icon function with standardized size
+    function createPieChartIcon(displaced, total, sizeFactor = 1) {
+      const displacedPercent = displaced / total;
+      const endAngle = displacedPercent * 360;
+      
+      // Use a fixed radius for all pie charts (e.g., 16 pixels)
+      const baseRadius = 30;
+      const radius = baseRadius * sizeFactor;
+      
+      const svg = `
+        <svg width="${radius * 2}" height="${radius * 2}" viewBox="0 0 ${radius * 2} ${radius * 2}">
+          <circle cx="${radius}" cy="${radius}" r="${radius}" fill="#418FDE"/>
+          <path d="M${radius},${radius} L${radius},0 A${radius},${radius} 0 ${endAngle > 180 ? 1 : 0},1 
+            ${radius + Math.sin((endAngle * Math.PI)/180) * radius},
+            ${radius - Math.cos((endAngle * Math.PI)/180) * radius} z" 
+            fill="rgba(255, 103, 31, 0.8)"/>
+          <circle cx="${radius}" cy="${radius}" r="${radius * 0.6}" fill="white" opacity="0.7"/>
+          <text x="${radius}" y="${radius}" text-anchor="middle" dominant-baseline="middle" 
+                font-size="${8 * sizeFactor}" font-weight="bold" fill="#e04c4c">
+            ${Math.round(displacedPercent * 100)}%
+          </text>
+        </svg>
+      `;
+
+      return L.divIcon({
+        html: svg,
+        iconSize: [radius * 2, radius * 2],
+        className: 'pie-chart-marker'
+      });
+    }
+
+    // Create a layer group for the pie chart markers
+    const pieMarkersLayer = L.layerGroup().addTo(map5);
+    
+    // Store references to all pie chart markers
+    const pieMarkers = [];
+
+    // Add markers with standardized pie charts
+    stateData.forEach(state => {
+      const [name, lat, lng, displaced, total] = state;
+      
+      const marker = L.marker([lat, lng], {
+        icon: createPieChartIcon(displaced, total, 1.0) // Default medium size
+      }).addTo(pieMarkersLayer).bindPopup(`
+        <b>${name}</b><br>
+        Total Population: ${total.toLocaleString()}<br>
+        Displaced: ${displaced.toLocaleString()} (${((displaced/total)*100).toFixed(1)}%)<br>
+        Non-Displaced: ${(total - displaced).toLocaleString()}
+      `);
+      
+      // Store reference to marker
+      pieMarkers.push({
+        name: name,
+        lat: lat,
+        lng: lng,
+        displaced: displaced,
+        total: total,
+        marker: marker
+      });
+    });
+
+    // Function to update pie chart sizes
+    function updatePieChartSizes(size) {
+      const sizeFactors = {
+        small: 0.7,
+        medium: 1.0,
+        large: 1.3
+      };
+      
+      const factor = sizeFactors[size];
+      
+      // Update all pie chart markers
+      pieMarkers.forEach(pieMarker => {
+        pieMarker.marker.setIcon(createPieChartIcon(pieMarker.displaced, pieMarker.total, factor));
+      });
+    }
+
+    // Enhanced legend control for pie chart map
+    const legend5 = L.control({position: 'bottomright'});
+    legend5.onAdd = () => {
+      const div = L.DomUtil.create('div', 'legend');
+      div.innerHTML = `
+        <h4>Displacement Proportion</h4>
+        <div class="legend-checkbox">
+          <input type="checkbox" id="displaced-checkbox" checked>
+          <label for="displaced-checkbox">Displaced Population</label>
+        </div>
+        <div class="legend-checkbox">
+          <input type="checkbox" id="remaining-checkbox" checked>
+          <label for="remaining-checkbox">Remaining Population</label>
+        </div>
+        <div class="marker-size-controls">
+          <div class="marker-size-label">Marker Size</div>
+          <div class="marker-size-buttons">
+            <button id="size-small">Small</button>
+            <button id="size-medium" class="active">Medium</button>
+            <button id="size-large">Large</button>
+          </div>
+          <div class="marker-size-label">Represents total state population</div>
+        </div>
+      `;
+      
+      // Add functionality to checkboxes
+      const displacedCheckbox = div.querySelector('#displaced-checkbox');
+      const remainingCheckbox = div.querySelector('#remaining-checkbox');
+      
+      displacedCheckbox.addEventListener('change', function() {
+        // Toggle visibility of displaced segments (orange)
+        const opacity = this.checked ? 1 : 0;
+        pieMarkers.forEach(pieMarker => {
+          const icon = pieMarker.marker.getIcon();
+          const newHtml = icon.options.html.replace(/fill="rgba\(255, 103, 31, [\d.]+\)"/g, 
+                                          `fill="rgba(255, 103, 31, ${opacity})"`);
+          icon.options.html = newHtml;
+          pieMarker.marker.setIcon(icon);
+        });
+      });
+      
+      remainingCheckbox.addEventListener('change', function() {
+        // Toggle visibility of remaining segments (blue)
+        const opacity = this.checked ? 1 : 0;
+        pieMarkers.forEach(pieMarker => {
+          const icon = pieMarker.marker.getIcon();
+          const newHtml = icon.options.html.replace(/fill="#418FDE"/g, 
+                                          `fill="rgba(65, 143, 222, ${opacity})"`);
+          icon.options.html = newHtml;
+          pieMarker.marker.setIcon(icon);
+        });
+      });
+      
+      // Add functionality to size buttons
+      const sizeButtons = div.querySelectorAll('.marker-size-buttons button');
+      sizeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          // Remove active class from all buttons
+          sizeButtons.forEach(btn => btn.classList.remove('active'));
+          // Add active class to clicked button
+          this.classList.add('active');
+          
+          // Change marker size
+          const size = this.id.split('-')[1]; // small, medium, or large
+          updatePieChartSizes(size);
+        });
+      });
+      
+      return div;
+    };
+    legend5.addTo(map5);
+
+    // Heatmap Data (from your timeline chart)
+    const months = ['Aug-2023', 'Sep-2023', 'Oct-2023', 'Nov-2023', 'Dec-2023', 
+                   'Jan-2024', 'Feb-2024', 'Mar-2024', 'Apr-2024', 'May-2024', 
+                   'Jun-2024', 'Jul-2024', 'Aug-2024', 'Sep-2024', 'Oct-2024', 
+                   'Nov-2024', 'Dec-2024', 'Jan-2025', 'Feb-2025', 'Mar-2025'];
+    
+    const idpsData = [3801754, 4425083, 4856294, 5340863, 5942580, 6144363, 
+                     6397698, 6622565, 6786816, 10095054, 10540215, 10710015, 
+                     10834382, 10890722, 11018231, 11359005, 11532774, 11568970, 
+                     11585384, 11301340];
+    
+    const returneesData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 396738];
+
+    // Prepare heatmap data
+    const heatmapData = [];
+    for (let i = 0; i < months.length; i++) {
+      heatmapData.push({
+        month: months[i],
+        idps: idpsData[i],
+        returnees: returneesData[i]
+      });
+    }
+
+    // Create heatmap
+    const heatmapElement = document.getElementById('heatmapChart');
+    const heatmapSlider = document.getElementById('heatmap-slider');
+    const heatmapPlayButton = document.getElementById('heatmap-play-button');
+    const heatmapTimeDisplay = document.getElementById('heatmap-time-display');
+    const heatmapExportButton = document.getElementById('heatmap-export-button');
+    
+    let heatmapChart;
+    let isPlaying = false;
+    let playInterval;
+    const animationSpeed = 1000; // milliseconds between frames
+
+    // Initialize heatmap
+    function initHeatmap() {
+      const initialData = getDataUpToIndex(0);
+      
+      const layout = {
+        title: 'Displacement Over Time',
+        xaxis: {
+          title: 'Month',
+          tickangle: -45,
+          showgrid: true,
+          gridcolor: '#f0f0f0'
+        },
+        yaxis: {
+          title: 'Number of People',
+          showgrid: true,
+          gridcolor: '#f0f0f0',
+          rangemode: 'tozero'
+        },
+        margin: {t: 50, l: 60, r: 30, b: 80},
+        hovermode: 'closest',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        legend: {
+          orientation: 'h',
+          yanchor: 'bottom',
+          y: 1.02,
+          xanchor: 'right',
+          x: 1
+        },
+        transition: {
+          duration: 500,
+          easing: 'cubic-in-out'
+        }
+      };
+      
+      const config = {
+        responsive: true,
+        displayModeBar: true
+      };
+      
+      heatmapChart = Plotly.newPlot(
+        heatmapElement, 
+        [
+          createTrace('IDPs', '#418FDE', initialData),
+          createTrace('Returnees', '#FF671F', initialData)
+        ], 
+        layout, 
+        config
+      );
+    }
+
+    // Create a trace for the chart
+    function createTrace(name, color, data) {
+      return {
+        x: data.map(d => d.month),
+        y: data.map(d => d[name.toLowerCase()]),
+        name: name,
+        type: 'scatter',
+        mode: 'lines+markers',
+        line: {color: color, width: 3},
+        marker: {size: 8, color: color},
+        hoverinfo: 'y+name',
+        hoverlabel: {bgcolor: color},
+        fill: 'tozeroy',
+        fillcolor: hexToRgba(color, 0.2)
+      };
+    }
+
+    // Helper function to convert hex to rgba
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
+    // Get data up to a specific index
+    function getDataUpToIndex(index) {
+      return heatmapData.slice(0, index + 1);
+    }
+
+    // Update heatmap to show data up to a specific time index
+    function updateHeatmap(timeIndex) {
+      timeIndex = Math.max(0, Math.min(timeIndex, months.length - 1));
+      
+      // Update UI elements
+      heatmapSlider.value = timeIndex;
+      heatmapTimeDisplay.textContent = months[timeIndex];
+      
+      // Get data for this time period
+      const currentData = getDataUpToIndex(timeIndex);
+      
+      // Update chart
+      Plotly.react(
+        heatmapElement,
+        [
+          createTrace('IDPs', '#418FDE', currentData),
+          createTrace('Returnees', '#FF671F', currentData)
+        ],
+        heatmapChart.layout
+      );
+    }
+
+    // Toggle play/pause of animation
+    function togglePlayback() {
+      isPlaying = !isPlaying;
+      
+      if (isPlaying) {
+        heatmapPlayButton.textContent = '❚❚ Pause';
+        
+        let currentIndex = parseInt(heatmapSlider.value);
+        playInterval = setInterval(() => {
+          currentIndex++;
+          if (currentIndex >= months.length) {
+            currentIndex = months.length - 1; // Stop at the last month
+            togglePlayback(); // Stop playback
+            return;
+          }
+          updateHeatmap(currentIndex);
+        }, animationSpeed);
+      } else {
+        heatmapPlayButton.textContent = '▶ Play';
+        clearInterval(playInterval);
+      }
+    }
+
+    // Export heatmap as image
+    function exportHeatmap() {
+      Plotly.downloadImage(heatmapElement, {
+        format: 'png',
+        width: 1200,
+        height: 600,
+        filename: 'sudan-displacement-heatmap'
+      });
+    }
+
+    // Initialize heatmap when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      initHeatmap();
+      
+      // Event listeners
+      heatmapSlider.addEventListener('input', () => {
+        if (isPlaying) togglePlayback();
+        updateHeatmap(parseInt(heatmapSlider.value));
+      });
+      
+      heatmapPlayButton.addEventListener('click', togglePlayback);
+      heatmapExportButton.addEventListener('click', exportHeatmap);
+      
+      // Keyboard controls
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName.toLowerCase() !== 'input') {
+          const currentIndex = parseInt(heatmapSlider.value);
+          
+          if (e.key === 'ArrowLeft') {
+            updateHeatmap(currentIndex - 1);
+            if (isPlaying) togglePlayback();
+          } else if (e.key === 'ArrowRight') {
+            updateHeatmap(currentIndex + 1);
+            if (isPlaying) togglePlayback();
+          } else if (e.key === ' ') {
+            togglePlayback();
+            e.preventDefault();
+          }
+        }
+      });
+    });
+
+    // IDP Accommodation Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        // Accommodation data
+        const data = {
+            labels: [
+                'Camp (formal)',
+                'Host Family/Community',
+                'Rented accommodation',
+                'Improvised shelters',
+                'Schools/public buildings',
+                'Informal settlements'
+            ],
+            datasets: [{
+                data: [415783, 1077264, 137092, 56239, 206804, 385332],
+                backgroundColor: [
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(52, 152, 219, 1)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)',
+                    'rgba(52, 152, 219, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        };
+
+        // Chart configuration
+        const config = {
+            type: 'bar',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.raw.toLocaleString();
+                            },
+                            afterLabel: function(context) {
+                                const total = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.raw / total) * 100).toFixed(1);
+                                return `Represents ${percentage}% of total`;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of IDPs by Accommodation Type',
+                        font: {
+                            size: 18
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString();
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Number of IDPs',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Accommodation Type',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        // Create the chart
+        const ctx = document.getElementById('accommodationChart').getContext('2d');
+        new Chart(ctx, config);
+    });
+
+    // Population Pyramid Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        // Population pyramid data
+        const ageGroups = ['0 - 01 Year', '01 - 05 Years', '06 - 17 Years', '18 - 59 Years', '60+ Years'];
+        const maleData = [523121, 866389, 1365369, 2054763, 425893];
+        const femaleData = [563794, 1045329, 1585772, 2436550, 434360];
+        
+        // Calculate percentages for better visualization
+        const totalPopulation = maleData.reduce((a, b) => a + b, 0) + femaleData.reduce((a, b) => a + b, 0);
+        const malePercentages = maleData.map(value => -(value / totalPopulation * 100).toFixed(2));
+        const femalePercentages = femaleData.map(value => (value / totalPopulation * 100).toFixed(2));
+        
+        const ctx = document.getElementById('populationPyramidChart').getContext('2d');
+        
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ageGroups,
+                datasets: [
+                    {
+                        label: 'Male',
+                        data: malePercentages,
+                        backgroundColor: 'rgba(65, 143, 222, 0.7)',
+                        borderColor: 'rgba(65, 143, 222, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Female',
+                        data: femalePercentages,
+                        backgroundColor: 'rgba(255, 103, 31, 0.7)',
+                        borderColor: 'rgba(255, 103, 31, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        stacked: true,
+                        ticks: {
+                            callback: function(value) {
+                                return Math.abs(value) + '%';
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Percentage of Total Population',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Age Group',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const datasetLabel = context.dataset.label || '';
+                                const value = context.raw;
+                                const absValue = Math.abs(value);
+                                const count = context.datasetIndex === 0 ? 
+                                    maleData[context.dataIndex] : 
+                                    femaleData[context.dataIndex];
+                                
+                                return `${datasetLabel}: ${absValue}% (${count.toLocaleString()})`;
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 20
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'IDP Population by Age and Gender',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
+                }
+            }
+        });
+    });
+
   </script>
 </body>
 </html>
- 
+<script>
+// Function to initialize the Population Distribution map
+async function initPopulationDistributionMap() {
+  console.log("Initializing Population Distribution Map");
+  
+  // Create a new map container in the HTML
+  if (!document.getElementById('population-distribution-map-container')) {
+    const mapContainer = document.createElement('div');
+    mapContainer.id = 'population-distribution-map-container';
+    mapContainer.className = 'maps-container';
+    mapContainer.style.opacity = '0';
+    mapContainer.style.transform = 'translateY(20px)';
+    mapContainer.style.animation = 'slideUp 0.8s ease-in-out forwards';
+    mapContainer.style.animationDelay = '0.8s';
+    
+    mapContainer.innerHTML = `
+      <div id="population-distribution-map-wrapper">
+        <div class="map-header">
+          <h2>Population Distribution by State</h2>
+          <div class="population-toggle">
+            <button class="toggle-btn active" data-type="idps">IDPs</button>
+            <button class="toggle-btn" data-type="returnees">Returnees</button>
+            <button class="toggle-btn" data-type="foreign_nationals">Foreign Nationals</button>
+          </div>
+        </div>
+        <div id="population-distribution-map" style="width: 100%; height: 80vh; border-radius: 8px;"></div>
+        <div id="map-loading" class="map-loading">Loading map data...</div>
+      </div>
+    `;
+    
+    // Insert the map container after the IDPs section
+    const idpsSection = document.getElementById('idps-section');
+    if (idpsSection && idpsSection.nextSibling) {
+      idpsSection.parentNode.insertBefore(mapContainer, idpsSection.nextSibling);
+    } else {
+      // Fallback: append to main container
+      const mainContainer = document.querySelector('.main-container');
+      if (mainContainer) {
+        mainContainer.appendChild(mapContainer);
+      }
+    }
+    
+    // Add CSS for the new map container
+    const style = document.createElement('style');
+    style.textContent = `
+      #population-distribution-map-wrapper {
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        position: relative;
+         margin-bottom: 20px;
+      }
+      
+      .map-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      
+      .population-toggle {
+        display: flex;
+        background: #f0f0f0;
+        border-radius: 6px;
+        overflow: hidden;
+        flex-wrap: wrap;
+      }
+      
+      .population-toggle .toggle-btn {
+        border: none;
+        padding: 8px 16px;
+        background: transparent;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #555;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+      }
+    
+      .population-toggle .toggle-btn.active {
+        background: #2A6FBB;
+        color: white;
+      }
+      
+      .population-toggle .toggle-btn:first-child {
+        border-radius: 6px 0 0 6px;
+      }
+      
+      .population-toggle .toggle-btn:last-child {
+        border-radius: 0 6px 6px 0;
+      }
+      
+      .search-container {
+        margin-bottom: 15px;
+        position: relative;
+      }
+      
+      #state-search {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      
+      .search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        border-top: none;
+        border-radius: 0 0 6px 6px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+      }
+      
+      .search-results div {
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+      
+      .search-results div:hover {
+        background-color: #f5f5f5;
+      }
+      
+      .info {
+        padding: 10px;
+        background: white;
+        border-radius: 5px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      }
+      
+      .info h4 {
+        margin: 0 0 5px;
+        color: #2A6FBB;
+        font-size: 16px;
+      }
+      
+      .population-legend {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        line-height: 1.5;
+      }
+      
+      .population-legend i {
+        width: 18px;
+        height: 18px;
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+      }
+      
+      .population-legend h4 {
+        margin: 0 0 10px;
+        color: #2A6FBB;
+        font-size: 15px;
+        font-weight: 600;
+      }
+      
+      .map-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        font-size: 16px;
+        color: #333;
+      }
+      
+      @media (max-width: 768px) {
+        .map-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .population-toggle {
+          width: 100%;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  try {
+    // Show loading state
+    const loadingElement = document.getElementById('map-loading');
+    if (loadingElement) loadingElement.style.display = 'flex';
+    
+    // Load GeoJSON data
+    const response = await fetch('./data/ADMIN1.json');
+    if (!response.ok) {
+      throw new Error(`Failed to load GeoJSON data: ${response.status}`);
+    }
+    
+    const sudanStatesData = await response.json();
+    
+    // Sample population data - in a real app, this would come from your data source
+    const populationData = {
+      "North Darfur": { 
+        idps: 1234567, 
+        returnees: 0,
+        foreign_nationals: 0
+      },
+      "South Darfur": { 
+        idps: 2345678, 
+        returnees: 0,
+        foreign_nationals: 0
+      },
+      "West Darfur": { 
+        idps: 876543, 
+        returnees:  8765,
+        foreign_nationals: 0
+      },
+      "East Darfur": { 
+        idps: 567890, 
+        returnees: 0,
+        foreign_nationals: 0
+      },
+      "Central Darfur": { 
+        idps: 456789, 
+        returnees:0,
+        foreign_nationals: 0
+      },
+      "Khartoum": { 
+        idps:  456789, 
+        returnees:  6789,
+        foreign_nationals:  7890
+      },
+      "Aj Jazirah": { 
+        idps: 789012, 
+        returnees: 889012,
+        foreign_nationals: 7890
+      },
+      "White Nile": { 
+        idps: 678901, 
+        returnees: 78901,
+        foreign_nationals: 8901
+      },
+      "Blue Nile": { 
+        idps: 345678, 
+        returnees: 0,
+        foreign_nationals: 9012
+      },
+      "Sennar": { 
+        idps: 234567, 
+        returnees: 34567,
+        foreign_nationals: 0
+      },
+      "Kassala": { 
+        idps: 123456, 
+        returnees: 23456,
+        foreign_nationals: 2345
+      },
+      "Red Sea": { 
+        idps: 98765, 
+        returnees: 8765,
+        foreign_nationals: 3456
+      },
+      "Northern": { 
+        idps: 87654, 
+        returnees: 7654,
+        foreign_nationals: 0
+      },
+      "River Nile": { 
+        idps: 76543, 
+        returnees:  0,
+        foreign_nationals:  678
+      },
+      "North Kordofan": { 
+        idps: 654321, 
+        returnees: 0,
+        foreign_nationals: 0
+      },
+      "South Kordofan": { 
+        idps: 543210, 
+        returnees: 0,
+        foreign_nationals: 0
+      },
+      "West Kordofan": { 
+        idps: 432109, 
+        returnees: 0,
+        foreign_nationals: 0
+      },
+      "Gedaref": { 
+        idps: 321098, 
+        returnees: 0,
+        foreign_nationals: 9012
+      }
+    };
+    
+    // Merge population data with GeoJSON features
+    sudanStatesData.features.forEach(feature => {
+      const stateName = feature.properties.admin1Name_en;
+      console.log(`Processing state: ${stateName}`);
+      
+      if (stateName && populationData[stateName]) {
+        feature.properties.total_idps = populationData[stateName].idps || 0;
+        feature.properties.total_returnees = populationData[stateName].returnees || 0;
+        feature.properties.total_foreign_nationals = populationData[stateName].foreign_nationals || 0;
+        feature.properties.state = stateName;
+      } else {
+        console.warn(`No population data found for state: ${stateName}`);
+        feature.properties.total_idps = 0;
+        feature.properties.total_returnees = 0;
+        feature.properties.total_foreign_nationals = 0;
+        feature.properties.state = stateName || 'Unknown';
+      }
+    });
+    
+    // Initialize the map
+    const populationMap = L.map('population-distribution-map').setView([16, 30], L.Browser.mobile ? 3 : 5.5);
+    
+    // Add the base layer
+    const mapboxCustom = L.tileLayer('https://api.mapbox.com/styles/v1/omerosman/cm8oy6is4006101si7ll3bs4h/tiles/{z}/{x}/{y}?access_token=pk.eyJ1Ijoib21lcm9zbWFuIiwiYSI6ImUxZDBkODBlNjQxMDE2M2Y3OTQ3MWIwNTJkMjgzZTI3In0.ekCHuxRflTOO0RpQ6rQR7Q', {
+      attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      tileSize: 512,
+      zoomOffset: -1,
+      maxZoom: 18
+    }).addTo(populationMap);
+    
+    // Define multiple base layers for the map
+    const cartoDBLight = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    
+    const openStreetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    
+    const esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: '&copy; <a href="https://www.esri.com/">Esri</a>'
+    });
+    
+    // Add layer control
+    const baseLayers = {
+      "Mapbox Custom": mapboxCustom,
+      "CartoDB Light": cartoDBLight,
+      "OpenStreetMap": openStreetMap,
+      "Esri World Imagery": esriWorldImagery
+    };
+    
+    L.control.layers(baseLayers).addTo(populationMap);
+    
+    // Current data type (IDPs, Returnees, or Foreign Nationals)
+    let currentDataType = 'idps';
+    
+    // Define color functions based on population type
+    function getColorForIDPs(d) {
+      return d > 1000000 ? '#084594' :
+             d > 500000  ? '#2171b5' :
+             d > 200000  ? '#4292c6' :
+             d > 100000  ? '#6baed6' :
+             d > 50000   ? '#9ecae1' :
+             d > 20000   ? '#c6dbef' :
+                           '#eff3ff';
+    }
+    
+    function getColorForReturnees(d) {
+      // Use RGB(255, 137, 82) for returnees with different opacities
+      return d > 1000000 ? 'rgba(255, 137, 82, 0.9)' :
+             d > 500000  ? 'rgba(255, 137, 82, 0.8)' :
+             d > 200000  ? 'rgba(255, 137, 82, 0.7)' :
+             d > 100000  ? 'rgba(255, 137, 82, 0.6)' :
+             d > 50000   ? 'rgba(255, 137, 82, 0.5)' :
+             d > 20000   ? 'rgba(255, 137, 82, 0.4)' :
+                           'rgba(255, 137, 82, 0.3)';
+    }
+    
+    function getColorForForeignNationals(d) {
+      // Use RGB(0, 196, 148) for foreign nationals with different opacities
+      return d > 1000000 ? 'rgba(0, 196, 148, 0.9)' :
+             d > 500000  ? 'rgba(0, 196, 148, 0.8)' :
+             d > 200000  ? 'rgba(0, 196, 148, 0.7)' :
+             d > 100000  ? 'rgba(0, 196, 148, 0.6)' :
+             d > 50000   ? 'rgba(0, 196, 148, 0.5)' :
+             d > 20000   ? 'rgba(0, 196, 148, 0.4)' :
+                           'rgba(0, 196, 148, 0.3)';
+    }
+    
+    // Main color function that selects the appropriate palette
+    function getColor(d) {
+      switch(currentDataType) {
+        case 'idps':
+          return getColorForIDPs(d);
+        case 'returnees':
+          return getColorForReturnees(d);
+        case 'foreign_nationals':
+          return getColorForForeignNationals(d);
+        default:
+          return getColorForIDPs(d);
+      }
+    }
+    
+    // Define style function
+    function style(feature) {
+      return {
+        fillColor: getColor(feature.properties[`total_${currentDataType}`] || 0),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+      };
+    }
+    
+    // Add hover interactions
+    function highlightFeature(e) {
+      const layer = e.target;
+      
+      layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+      });
+      
+      if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+      }
+      
+      info.update(layer.feature.properties);
+    }
+    
+    function resetHighlight(e) {
+      geojsonLayer.resetStyle(e.target);
+      info.update();
+    }
+    
+    function zoomToFeature(e) {
+      populationMap.fitBounds(e.target.getBounds());
+    }
+    
+    function onEachFeature(feature, layer) {
+      layer.on({
+        mouseover: highlightFeature,
+        mouseout: resetHighlight,
+        click: zoomToFeature
+      });
+    }
+    
+    // Add GeoJSON layer
+    let geojsonLayer = L.geoJSON(sudanStatesData, {
+      style: style,
+      onEachFeature: onEachFeature
+    }).addTo(populationMap);
+    
+    // Fit map to bounds of all features
+    populationMap.fitBounds(geojsonLayer.getBounds());
+    
+    // Add info control
+    const info = L.control();
+    
+    info.onAdd = function(map) {
+      this._div = L.DomUtil.create('div', 'info');
+      this.update();
+      return this._div;
+    };
+    
+    info.update = function(props) {
+      let title, valueLabel;
+      
+      switch(currentDataType) {
+        case 'idps':
+          title = 'IDP Distribution';
+          valueLabel = 'IDPs';
+          break;
+        case 'returnees':
+          title = 'Returnee Distribution';
+          valueLabel = 'Returnees';
+          break;
+        case 'foreign_nationals':
+          title = 'Foreign Nationals Distribution';
+          valueLabel = 'Foreign Nationals';
+          break;
+      }
+      
+      this._div.innerHTML = `<h4>Sudan ${title}</h4>` + 
+        (props ? 
+          `<b>${props.state}</b><br />` + 
+          (props[`total_${currentDataType}`] || 0).toLocaleString() + 
+          ` ${valueLabel}` : 
+          'Hover over a state');
+    };
+    
+    info.addTo(populationMap);
+    
+    // Function to update map display based on selected data type
+    function updateMapDisplay(dataType) {
+      currentDataType = dataType;
+      
+      // Update the legend
+      if (legend) {
+        legend.remove();
+        legend.addTo(populationMap);
+      }
+      
+      // Update the style and info display
+      geojsonLayer.setStyle(feature => {
+        const value = feature.properties[`total_${dataType}`] || 0;
+        return {
+          fillColor: getColor(value),
+          weight: 2,
+          opacity: 1,
+          color: 'white',
+          dashArray: '3',
+          fillOpacity: 0.7
+        };
+      });
+      
+      // Update the info control function
+      info.update = function(props) {
+        let title, valueLabel;
+        
+        switch(dataType) {
+          case 'idps':
+            title = 'IDP Distribution';
+            valueLabel = 'IDPs';
+            break;
+          case 'returnees':
+            title = 'Returnee Distribution';
+            valueLabel = 'Returnees';
+            break;
+          case 'foreign_nationals':
+            title = 'Foreign Nationals Distribution';
+            valueLabel = 'Foreign Nationals';
+            break;
+        }
+        
+        this._div.innerHTML = `<h4>Sudan ${title}</h4>` + 
+          (props ? 
+            `<b>${props.state}</b><br />` + 
+            (props[`total_${dataType}`] || 0).toLocaleString() + 
+            ` ${valueLabel}` : 
+            'Hover over a state');
+      };
+      
+      // Trigger an update for the info control
+      info.update();
+    }
+    
+    // Add toggle buttons functionality
+    const toggleButtons = document.querySelectorAll('.population-toggle .toggle-btn');
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons
+        toggleButtons.forEach(btn => btn.classList.remove('active'));
+        // Add active class to the clicked button
+        button.classList.add('active');
+        // Update the map display
+        updateMapDisplay(button.dataset.type);
+      });
+    });
+    
+    // Add legend control
+    const legend = L.control({position: 'bottomright'});
+    
+    legend.onAdd = function(map) {
+      const div = L.DomUtil.create('div', 'info legend population-legend');
+      let grades, title, colorFunc;
+      
+      switch(currentDataType) {
+        case 'idps':
+          grades = [0, 20000, 50000, 100000, 200000, 500000, 1000000];
+          title = 'IDPs';
+          colorFunc = getColorForIDPs;
+          break;
+        case 'returnees':
+          grades = [0, 20000, 50000, 100000, 200000, 500000, 1000000];
+          title = 'Returnees';
+          colorFunc = getColorForReturnees;
+          break;
+        case 'foreign_nationals':
+          grades = [0, 20000, 50000, 100000, 200000, 500000, 1000000];
+          title = 'Foreign Nationals';
+          colorFunc = getColorForForeignNationals;
+          break;
+      }
+      
+      div.innerHTML = `<h4>${title}</h4>`;
+      
+      // Loop through population intervals and generate a label with a colored square for each interval
+      for (let i = 0; i < grades.length; i++) {
+        div.innerHTML +=
+          '<i style="background:' + colorFunc(grades[i] + 1) + '"></i> ' +
+          grades[i].toLocaleString() + (grades[i + 1] ? '&ndash;' + grades[i + 1].toLocaleString() + '<br>' : '+');
+      }
+      
+      return div;
+    };
+    
+    legend.addTo(populationMap);
+    
+    // Hide loading state
+    if (loadingElement) loadingElement.style.display = 'none';
+    
+    console.log("Population Distribution Map initialized successfully");
+    
+  } catch (error) {
+    console.error("Error initializing Population Distribution Map:", error);
+    const mapElement = document.getElementById('population-distribution-map');
+    if (mapElement) {
+      mapElement.innerHTML = '<p style="color: red; text-align: center; padding: 20px;">Error loading map data. Please try again later.</p>';
+    }
+    // Hide loading state on error
+    const loadingElement = document.getElementById('map-loading');
+    if (loadingElement) loadingElement.style.display = 'none';
+  }
+}
+
+// Call the initialization function when the DOM is ready
+document.addEventListener('DOMContentLoaded', initPopulationDistributionMap);
+
+</script>
