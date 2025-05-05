@@ -66,11 +66,10 @@
 
       // Initialize the map
       const map3 = L.map('map3', {
-    if (L.Browser.mobile) {
-      map.setView([34.5, 66.0], 3);
-    } else {
-      map.setView([34.5, 66.0], 6.45);
-    }
+        center: MAP_CONFIG.center,
+        zoom: MAP_CONFIG.zoom,
+        minZoom: MAP_CONFIG.minZoom,
+        maxZoom: MAP_CONFIG.maxZoom
       });
 
       // Base layers configuration
